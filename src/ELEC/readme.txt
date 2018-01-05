@@ -1,0 +1,1 @@
+use seq-cnn and bow-cnn model to classify data
