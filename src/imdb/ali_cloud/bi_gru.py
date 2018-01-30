@@ -14,7 +14,7 @@ from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPoo
 from tensorflow.python.lib.io.file_io import FileIO
 
 num_words=30000
-max_len=500
+max_len=400
 word_dimension=300
 FLAGS = None
 
@@ -79,24 +79,26 @@ def get_model(embedding_matrix):
     input_1 = Input((max_len,))
     init_1=keras.initializers.random_uniform(minval=-0.05,maxval=0.05)
     embedding = Embedding(num_words, 300,
-                            # weights=[embedding_matrix],
-                          embeddings_initializer=init_1,
-                            trainable=True)
+                             weights=[embedding_matrix],
+                          # embeddings_initializer=init_1,
+                            trainable=False)
     embedding_1=embedding(input_1)
-    x = SpatialDropout1D(0.25)(embedding_1)
+    # x = SpatialDropout1D(0.25)(embedding_1)
     x = GRU(300,
             dropout=0.2,
             recurrent_dropout=0.2,
-            activation='relu')(x)
+            # activation='relu'
+            )(embedding_1)
     # x = Dense(300, activation='relu')(x)
 
     input_2 = Input((max_len,))
     embedding_2 = embedding(input_2)
-    y = SpatialDropout1D(0.25)(embedding_2)
+    # y = SpatialDropout1D(0.25)(embedding_2)
     y = GRU(300,
             dropout=0.2,
             recurrent_dropout=0.2,
-            activation='relu')(y)
+            # activation='relu'
+            )(embedding_2)
     # y = Dense(300, activation='relu')(y)
 
     a = keras.layers.concatenate([x, y])

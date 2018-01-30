@@ -5,15 +5,16 @@
 import pickle
 import numpy as np
 import keras
+import keras.backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.models import Model
 from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPooling1D, GlobalAveragePooling1D, Dropout, \
-    BatchNormalization, RepeatVector, SpatialDropout1D, Activation, Reshape, Permute
+    BatchNormalization, RepeatVector, SpatialDropout1D, Activation, Reshape, Permute,Lambda
 from keras import regularizers, constraints
 
-num_words = 30000
+num_words = 80000
 num_ngram = 500000
 max_len = 100
 num_train = 120000
@@ -39,7 +40,7 @@ def get_input():
             t.append('%d_%d' % (seq[i], seq[i + 1]))
         # for i in range(len(seq) - 2):
         #     t.append('%d_%d_%d' % (seq[i], seq[i + 1], seq[i + 2]))
-        new_text.append(' '.join(list(t)))
+        new_text.append(' '.join(t))
 
     tokenizer2 = Tokenizer(num_words=num_ngram)
     tokenizer2.filters = ''
@@ -64,13 +65,7 @@ def get_model():
     embedding1 = Embedding(num_ngram, num_class,
                            weights=[word_embed],
                            )(main_input)
-    # x=SpatialDropout1D(0.3)(embedding1)
-    # print(embedding1)
-    x = Permute((2, 1))(embedding1)
-    x=Dense(1,
-            weights=[np.ones([max_len, 1]), np.zeros([1])],
-            trainable=False)(x)
-
+    x=Lambda(lambda x:K.sum(x,1))(embedding1)
     output = Activation('softmax')(x)
     model = Model(inputs=main_input, outputs=output)
     model.compile(loss='categorical_crossentropy', optimizer='nadam', metrics=['accuracy'])
@@ -80,6 +75,6 @@ def get_model():
 if __name__ == '__main__':
     x_train, y_train, x_test, y_test = get_input()
     model = get_model()
-    model.fit([x_train], y_train, batch_size=512, epochs=10, shuffle=True,
+    model.fit([x_train], y_train, batch_size=256, epochs=10, shuffle=True,
               validation_data=([x_test], y_test))
 
