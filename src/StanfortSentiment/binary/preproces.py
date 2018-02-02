@@ -1,91 +1,76 @@
-import codecs
+# -*- coding: utf-8 -*-
+
+# 提取句子级别的样本和标签
+
 import numpy as np
 import pickle
 
+data_dir='../../../data/StanfordSentiment/'
+temp_dir='../../../temp/StanfortSentiment/binary/preprocess/'
 
-f=codecs.open('D:\\docker\\StanfordSentiment\\data\\datasetSentences.txt','r','utf-8')
-texts = []
-count=0
-for line in f:
-    if count==0:
-        count=1
-        continue
-    texts.append(line.split('\t')[1][:-1])
-f.close()
+with open(data_dir+'datasetSentences.txt',mode='r',encoding='utf-8') as f:
+    texts = []
+    count=0
+    for line in f:
+        if count==0:
+            count=1
+            continue
+        texts.append(line.split('\t')[1][:-1])
+
 
 labledic = {}
 count=0
-flable = codecs.open('D:\\docker\\StanfordSentiment\\data\\sentiment_labels.txt')
-for line in flable:
-    if count==0:
-        count=1
-        continue
-    words = line.split('|')
-    labledic[words[0]] = float(words[1][:-1])    
-flable.close()
+with open(data_dir+'sentiment_labels.txt') as f:
+    for line in f:
+        if count==0:
+            count=1
+            continue
+        words = line.split('|')
+        labledic[words[0]] = float(words[1][:-1])
 
-# Y = np.zeros((len(texts)),dtype=np.float32)
-# f=codecs.open('D:\\docker\\StanfordSentiment\\data\\dictionary.txt','r','utf-8')
-# for line in f:
-#     phrases = line.split('|')
-#     for index,line2 in enumerate(texts):
-#         if line2==phrases[0]:
-#             Y[index]=labledic[phrases[1][:-1]]
-# np.save('D:\\docker\\StanfordSentiment\\FourthMethod\\Y.npy',Y)
-Y=np.load('D:\\docker\\StanfordSentiment\\FourthMethod\\Y.npy')        
 
-leny = Y.shape[0]
-for i in range(leny):
+Y = np.zeros((len(texts)),dtype=np.float32)
+phrase_id=dict()
+with open(data_dir+'dictionary.txt') as f:
+    for line in f:
+        phrases = line.split('|')
+        phrase_id[phrases[0]]=phrases[1][:-1]
+
+for doc_id,doc in enumerate(texts):
+    Y[doc_id]=labledic[phrase_id[doc]]
+
+print('has got Y')
+
+for i in range(len(texts)):
     if Y[i]<=0.4:
         Y[i] = 0
     elif Y[i]<=0.6:
         Y[i]=2
     else:
         Y[i]=1
-f.close()
-
 
 
 newtexts = []
 newY = np.zeros((len(texts)),dtype=np.float32)
-f=codecs.open('D:\\docker\\StanfordSentiment\\data\\datasetSplit.txt')
-count=0
-index = 0
-for line in f:
-    if count==0:
-        count=1
-        continue        
-    words = line[:-1].split(",")
-    if words[1]=='1':
-        newtexts.append(texts[int(words[0])-1])
-        newY[index] = Y[int(words[0])-1]
-        index+=1
-print(index)
-count=0
-f.seek(0)
-for line in f:
-    if count==0:
-        count=1
-        continue 
-    words = line[:-1].split(",")
-    if words[1]=='2':
-        newtexts.append(texts[int(words[0])-1])
-        newY[index] = Y[int(words[0])-1]
-        index+=1
-print(index)
-count=0
-f.seek(0)
-for line in f:
-    if count==0:
-        count=1
-        continue  
-    words = line[:-1].split(",")
-    if words[1]=='3':
-        newtexts.append(texts[int(words[0])-1])
-        newY[index] = Y[int(words[0])-1]
-        index+=1
-print(index)
+with open(data_dir+'datasetSplit.txt') as f:
+    train_id=[]
+    test_id=[]
+    val_id=[]
+    lines=f.readlines()[1:]
+    for line in lines:
+        words = line[:-1].split(",")
+        if words[1] == '1':
+            train_id.append(int(words[0])-1)
+        elif words[1] == '2':
+            test_id.append(int(words[0]) - 1)
+        else:
+            val_id.append(int(words[0])-1)
+    for i,id in enumerate(train_id+test_id+val_id):
+        newtexts.append(texts[id])
+        newY[i]=Y[id]
 
+
+# 去除中性句子
 newtexts2=[]
 newY2=[]
 count=0
@@ -109,15 +94,13 @@ for i in range(1101):
         newY2.append(newY[i+10754])
         newtexts2.append(newtexts[i+10754])
 print(count)
-#print(len(newY2))
-#print(newtexts2[4000])
-#print(newY2[4000])
-out = codecs.open("D:\\docker\\StanfordSentiment\\FourthMethod\\texts.pkl",'wb')
-pickle.dump(newtexts2,out,1)
-out.close()
-np.save('D:\\docker\\StanfordSentiment\\FourthMethod\\Ytrain.npy',np.asarray(newY2)[0:6920])
-np.save('D:\\docker\\StanfordSentiment\\FourthMethod\\Ytest.npy',np.asarray(newY2)[6920:8741])
-np.save('D:\\docker\\StanfordSentiment\\FourthMethod\\Yval.npy',np.asarray(newY2)[8741:9613])
-f.close()
+
+with open(temp_dir+"texts.pkl",'wb') as f:
+    pickle.dump(newtexts2,f,1)
+
+np.save(temp_dir+'Ytrain.npy',np.asarray(newY2)[0:6920])
+np.save(temp_dir+'Ytest.npy',np.asarray(newY2)[6920:8741])
+np.save(temp_dir+'Yval.npy',np.asarray(newY2)[8741:9613])
+
 
 # 6920 1821 872
