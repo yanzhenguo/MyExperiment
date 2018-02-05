@@ -80,5 +80,5 @@ def main(ngram):
     process_files(texts[25000:37500], texts[37500:50000], dic, r, root_dir+"temp/imdb/keras_code/nbsvm/test-nbsvm.txt", ngram)
 
 
-
-main(ngram='1')
+if __name__=='__main__':
+    main(ngram='1')

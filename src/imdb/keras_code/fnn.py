@@ -4,18 +4,18 @@
 
 import pickle
 import numpy as np
-import keras
+import keras.backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Model
 from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPooling1D, GlobalAveragePooling1D, Dropout,\
-    BatchNormalization, RepeatVector, SpatialDropout1D,Activation,Reshape
+    BatchNormalization, RepeatVector, SpatialDropout1D,Activation,Reshape,Lambda
 from keras import regularizers,constraints
 
 
-num_words = 80000
-num_ngram=5000000
-max_len = 500
+num_words = 30000
+num_ngram=500000
+max_len = 800
 root_dir = '../../../'
 
 def get_input():
@@ -30,14 +30,14 @@ def get_input():
     sequences = tokenizer.texts_to_sequences(texts)
     new_text=[]
     for seq in sequences:
-        t=set()
+        t=[]
         for i in range(len(seq)):
-            t.add('%d'%(seq[i]))
+            t.append('%d'%(seq[i]))
         for i in range(len(seq)-1):
-            t.add('%d_%d'%(seq[i],seq[i+1]))
+            t.append('%d_%d'%(seq[i],seq[i+1]))
         for i in range(len(seq)-2):
-            t.add('%d_%d_%d'%(seq[i],seq[i+1],seq[i+2]))
-        new_text.append(' '.join(list(t)))
+            t.append('%d_%d_%d'%(seq[i],seq[i+1],seq[i+2]))
+        new_text.append(' '.join(t))
 
     tokenizer2=Tokenizer(num_words=num_ngram)
     tokenizer2.filters=''
@@ -57,24 +57,14 @@ def get_input():
     return x_train, y_train, x_test, y_test
 
 def get_model():
-    word_embed=0.05*np.random.rand(num_ngram,1)-0.05
-    word_embed[0]=0
-    #print(word_embed[:50])
+    word_embed=0.1*np.random.rand(num_ngram,1)-0.05
 
     main_input = Input(shape=(max_len,))
     embedding1 = Embedding(num_ngram, 1,
                            weights=[word_embed],
-                           #embeddings_regularizer=regularizers.l2(0.01)
-                           # embeddings_constraint=MaxNorm(5)
                            )(main_input)
-    # x=SpatialDropout1D(0.3)(embedding1)
-    # print(embedding1)
-    x=Reshape((max_len,))(embedding1)
-    # print(x)
-    output=Dense(1,
-            weights=[np.ones([max_len,1]),np.zeros([1])],
-            trainable=False,
-            activation='sigmoid')(x)
+    x = Lambda(lambda x: K.sum(x, 1))(embedding1)
+    output=Activation('sigmoid')(x)
     model = Model(inputs=main_input, outputs=output)
     model.compile(loss='binary_crossentropy', optimizer='nadam', metrics=['accuracy'])
     return model

@@ -166,7 +166,7 @@ class ImdbCorpus():
         word_index = self.tokenizer.word_index
         embeddings_index = {}
         wordX = np.load('/home/yan/my_datasets/word2vec/word2vec.npy')
-        f = codecs.open('/home/yan/my_datasets/word2vec/wordsInWord2vec.pkl', 'rb')
+        f = codecs.open('/home/yan/my_datasets/word2vec/words.pkl', 'rb')
         allwords = pickle.load(f)
         f.close()
         for i in range(3000000):

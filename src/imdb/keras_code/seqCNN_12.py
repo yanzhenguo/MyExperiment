@@ -72,7 +72,7 @@ Ytest=Ytest[indice2]
 print('begin to build model ...')
 input1=Input(shape=(max_len,))
 embedding1=Embedding(num_words,500,input_length=max_len,embeddings_initializer='normal')(input1)
-x=GlobalAveragePooling1D(embedding1)
+x=GlobalAveragePooling1D()(embedding1)
 
 input2=Input(shape=((max_len-1)*2,))
 embedding2=Embedding(num_words*2,500,input_length=(max_len-1)*2,embeddings_initializer='normal')(input2)
