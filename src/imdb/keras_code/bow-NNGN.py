@@ -11,7 +11,7 @@ from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPoo
 
 num_words = 30000
 max_len = 1000
-word_dimension = 1000
+word_dimension = 500
 root_dir = '../../../'
 
 

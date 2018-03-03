@@ -64,6 +64,7 @@ def get_model():
                            weights=[word_embed],
                            )(main_input)
     x = Lambda(lambda x: K.sum(x, 1))(embedding1)
+    print(x)
     output=Activation('sigmoid')(x)
     model = Model(inputs=main_input, outputs=output)
     model.compile(loss='binary_crossentropy', optimizer='nadam', metrics=['accuracy'])

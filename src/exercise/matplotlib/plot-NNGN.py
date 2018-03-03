@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 # 读取数据
-with open('/home/yan/文档/小论文实验/seq-NNGN') as f:
+with open('/home/yan/文档/小论文实验/seq-NNGN.txt') as f:
     text=f.readlines()
 text=text[1:]
 seq_2=np.ones([20])
@@ -13,7 +13,7 @@ for index,line in enumerate(text):
     seq_3[index] = nums[1]
     seq_4[index] = nums[2]
 
-with open('/home/yan/文档/小论文实验/bow-NNGN') as f:
+with open('/home/yan/文档/小论文实验/bow-NNGN.txt') as f:
     text=f.readlines()
 text=text[1:]
 bow_2=np.ones([20])
@@ -41,21 +41,21 @@ plt.figure(figsize=(10,6),dpi=300)
 
 
 plt.subplot(1,2,1)
-plt.plot(x_ax,seq_2,label='2-ngram')
-plt.plot(x_ax,seq_3,label='3-ngram')
-plt.plot(x_ax,seq_4,label='4-ngram')
+plt.plot(x_ax,seq_2,label='2-gram')
+plt.plot(x_ax,seq_3,label='3-gram')
+plt.plot(x_ax,seq_4,label='4-gram')
 plt.xlabel('embedding dimension')
 plt.ylabel('accuracy')
 plt.title('seq-NNGN')
-plt.legend()
+plt.legend(loc='lower right')
 
 plt.subplot(1,2,2)
-plt.plot(x_ax,bow_2,label='2-ngram')
-plt.plot(x_ax,bow_3,label='3-ngram')
-plt.plot(x_ax,bow_4,label='4-ngram')
-plt.plot(x_ax,bow_5,label='5-ngram')
-plt.plot(x_ax,bow_6,label='6-ngram')
-plt.plot(x_ax,bow_7,label='7-ngram')
+plt.plot(x_ax,bow_2,label='2-gram')
+plt.plot(x_ax,bow_3,label='3-gram')
+plt.plot(x_ax,bow_4,label='4-gram')
+plt.plot(x_ax,bow_5,label='5-gram')
+plt.plot(x_ax,bow_6,label='6-gram')
+plt.plot(x_ax,bow_7,label='7-gram')
 plt.xlabel('embedding dimension')
 plt.ylabel('accuracy')
 plt.title('bow-NNGN')
