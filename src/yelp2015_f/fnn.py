@@ -14,8 +14,8 @@ from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPoo
 from keras import regularizers, constraints
 
 num_words = 40000
-num_ngram = 800000
-max_len = 400
+num_ngram = 500000
+max_len = 300
 num_train = 650000
 num_test = 50000
 num_class = 5
@@ -37,8 +37,8 @@ def get_input():
             t.append('%d' % (seq[i]))
         for i in range(len(seq) - 1):
             t.append('%d_%d' % (seq[i], seq[i + 1]))
-        # for i in range(len(seq) - 2):
-        #     t.append('%d_%d_%d' % (seq[i], seq[i + 1], seq[i + 2]))
+        for i in range(len(seq) - 2):
+            t.append('%d_%d_%d' % (seq[i], seq[i + 1], seq[i + 2]))
         new_text.append(' '.join(list(t)))
 
     tokenizer2 = Tokenizer(num_words=num_ngram)

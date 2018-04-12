@@ -13,9 +13,9 @@ from keras.layers import Input, Embedding, AveragePooling1D, Dense, GlobalMaxPoo
     BatchNormalization, RepeatVector, SpatialDropout1D, Activation, Reshape, Permute
 from keras import regularizers, constraints
 
-num_words = 200000
-num_ngram = 200000
-max_len = 1000
+num_words = 30000
+num_ngram = 500000
+max_len = 500
 num_train = 450000
 num_test = 60000
 num_class=5
@@ -30,24 +30,24 @@ def get_input():
     print('there are %d words' % (len(tokenizer.word_index)))
     sequences = tokenizer.texts_to_sequences(texts)
     # print('average length is %d'%(np.sum([len(s) for s in sequences])/len(sequences)))
-    # new_text = []
-    # for seq in sequences:
-    #     t = []
-    #     for i in range(len(seq)):
-    #         t.append('%d' % (seq[i]))
-    #     for i in range(len(seq) - 1):
-    #         t.append('%d_%d' % (seq[i], seq[i + 1]))
-    #     # for i in range(len(seq) - 2):
-    #     #     t.append('%d_%d_%d' % (seq[i], seq[i + 1], seq[i + 2]))
-    #     new_text.append(' '.join(list(t)))
-    #
-    # tokenizer2 = Tokenizer(num_words=num_ngram)
-    # tokenizer2.filters = ''
-    # tokenizer2.fit_on_texts(new_text[:num_train])
-    # sequences2 = tokenizer2.texts_to_sequences(new_text)
-    # print('there are %d ngrams' % (len(tokenizer2.word_index)))
+    new_text = []
+    for seq in sequences:
+        t = []
+        for i in range(len(seq)):
+            t.append('%d' % (seq[i]))
+        for i in range(len(seq) - 1):
+            t.append('%d_%d' % (seq[i], seq[i + 1]))
+        # for i in range(len(seq) - 2):
+        #     t.append('%d_%d_%d' % (seq[i], seq[i + 1], seq[i + 2]))
+        new_text.append(' '.join(list(t)))
 
-    x = pad_sequences(sequences, maxlen=max_len)
+    tokenizer2 = Tokenizer(num_words=num_ngram)
+    tokenizer2.filters = ''
+    tokenizer2.fit_on_texts(new_text[:num_train])
+    sequences2 = tokenizer2.texts_to_sequences(new_text)
+    print('there are %d ngrams' % (len(tokenizer2.word_index)))
+
+    x = pad_sequences(sequences2, maxlen=max_len)
     x_train = x[:num_train]
     x_test = x[num_train:]
     y = np.load(root_dir + 'temp/sougou/extract_data/label.npy')
@@ -86,3 +86,4 @@ if __name__ == '__main__':
     model.fit([x_train], y_train, batch_size=256, epochs=10, shuffle=True,
               validation_data=([x_test], y_test))
 
+# 准确率 96.33%
